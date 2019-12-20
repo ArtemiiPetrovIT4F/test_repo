@@ -221,3 +221,58 @@ ALTER TABLE bonds.quotes
 ADD FOREIGN KEY ("ID") REFERENCES bonds.listing ("ID"); 
 
 -- Задание 4. 
+
+-- 1) подсчёт bidов 
+SELECT "ISIN", count(*) as "num_bid"
+FROM bonds.quotes
+GROUP BY "ISIN";
+
+-- 2) подсчёт not null bidов
+SELECT "ISIN", count(*) AS "not_null_bid"
+FROM bonds.quotes
+WHERE "BID" IS NOT NULL
+GROUP BY "ISIN";
+
+-- 3) подсчёт доли not_null_bids
+SELECT DISTINCT a."ISIN", b."not_null_bid"::float / a."num_bid"::float as "nun_ratio"
+FROM (
+	SELECT "ISIN", count(*) as "num_bid"
+	FROM bonds.quotes
+	GROUP BY "ISIN"
+) as a
+INNER JOIN (SELECT "ISIN", count(*) AS "not_null_bid"
+			FROM bonds.quotes
+			WHERE "BID" IS NOT NULL
+			GROUP BY "ISIN"
+) as b
+ON a."ISIN"=b."ISIN"
+WHERE (b."not_null_bid"::float / a."num_bid"::float) >= 0.9;
+
+-- 4) платформа и режим торгов
+
+SELECT "ISIN", "IssuerName"
+FROM bonds.listing
+WHERE "Platform" = 'Московская Биржа ' AND "Section" = ' Основной';
+
+
+-- 5) итоговый запрос
+
+SELECT DISTINCT c."ISIN", c."nun_ratio", d."IssuerName" as "Issuer"
+FROM (SELECT DISTINCT a."ISIN", b."not_null_bid"::float / a."num_bid"::float as "nun_ratio"
+	FROM (
+	SELECT "ISIN", count(*) as "num_bid"
+	FROM bonds.quotes
+	GROUP BY "ISIN"
+) as a
+INNER JOIN (SELECT "ISIN", count(*) AS "not_null_bid"
+			FROM bonds.quotes
+			WHERE "BID" IS NOT NULL
+			GROUP BY "ISIN"
+) as b
+ON a."ISIN"=b."ISIN"
+WHERE (b."not_null_bid"::float / a."num_bid"::float) >= 0.9) as c
+INNER JOIN (SELECT "ISIN", "IssuerName"
+FROM bonds.listing
+WHERE "Platform" = 'Московская Биржа ' AND "Section" = ' Основной'
+) as d
+ON c."ISIN" = d."ISIN";
