@@ -25,7 +25,7 @@ ALTER TABLE bonds.listing
 
 COPY  bonds.listing
 FROM 'C:\Users\Public\listing.csv' 
-	DELIMITERS ';' CSV HEADER ENCODING 'UTF8';
+	DELIMITERS ';' CSV HEADER;
 
 -- 1.2 Создаём таблицу quotes_task, в качестве ключей используем ID и TIME.
 
@@ -85,7 +85,7 @@ ALTER TABLE bonds.quotes
     
 COPY bonds.quotes
 FROM 'C:\Users\Public\quotes.csv'
-DELIMITERS ';' CSV HEADER ENCODING 'UTF8';
+DELIMITERS ';' CSV HEADER;
     
  -- 1.3 Создаём таблицу bonds.bond_description, в качестве ключей используем ISIN, RegCode, NRD Code.
  
@@ -159,7 +159,7 @@ TABLESPACE pg_default;
     
 COPY bonds.bond_description
 FROM 'C:\Users\Public\bond_description.csv'
-DELIMITERS ';' CSV HEADER ENCODING 'UTF8';
+DELIMITERS ';' CSV HEADER;
 
 -- Задание 2. Выносим необходимую информацию в таблицу listing.
 -- Создаём столбцы в таблице listing
