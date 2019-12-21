@@ -209,11 +209,11 @@ ADD CONSTRAINT for_key_1 FOREIGN KEY ("Issuer_ID") REFERENCES bonds.listing ("ID
 -- добавляем уникальный ID
 
 INSERT INTO bonds.listing
-SELECT b."ID", b."ISIN", b."BOARDNAME", b."BOARDID"
+SELECT a."ID", a."ISIN", a."BOARDNAME", a."BOARDID"
 FROM (SELECT DISTINCT bonds.quotes."ID", bonds.quotes."ISIN", bonds.quotes."BOARDNAME", bonds.quotes."BOARDID"
 	  FROM bonds.quotes
 	  WHERE bonds.quotes."ID" NOT IN (SELECT "ID" 
-	       FROM bonds.listing)) as b;
+	       FROM bonds.listing)) as a;
                                       
 -- добавляем внешний ключ для связи listing и quotes
 
@@ -222,18 +222,18 @@ ADD FOREIGN KEY ("ID") REFERENCES bonds.listing ("ID");
 
 -- Задание 4. 
 
--- 1) подсчёт bidов 
+-- подсчёт bidов 
 SELECT "ISIN", count(*) as "num_bid"
 FROM bonds.quotes
 GROUP BY "ISIN";
 
--- 2) подсчёт not null bidов
+-- подсчёт not null bidов
 SELECT "ISIN", count(*) AS "not_null_bid"
 FROM bonds.quotes
 WHERE "BID" IS NOT NULL
 GROUP BY "ISIN";
 
--- 3) подсчёт доли not_null_bids
+-- подсчёт доли not_null_bids
 SELECT DISTINCT a."ISIN", b."not_null_bid"::float / a."num_bid"::float as "nun_ratio"
 FROM (
 	SELECT "ISIN", count(*) as "num_bid"
@@ -248,14 +248,14 @@ INNER JOIN (SELECT "ISIN", count(*) AS "not_null_bid"
 ON a."ISIN"=b."ISIN"
 WHERE (b."not_null_bid"::float / a."num_bid"::float) >= 0.9;
 
--- 4) платформа и режим торгов
+-- платформа и режим торгов
 
 SELECT "ISIN", "IssuerName"
 FROM bonds.listing
 WHERE "Platform" = 'Московская Биржа ' AND "Section" = ' Основной';
 
 
--- 5) итоговый запрос
+-- итоговый запрос
 
 SELECT DISTINCT c."ISIN", c."nun_ratio", d."IssuerName" as "Issuer"
 FROM (SELECT DISTINCT a."ISIN", b."not_null_bid"::float / a."num_bid"::float as "nun_ratio"
